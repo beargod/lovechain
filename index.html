@@ -1,0 +1,320 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <meta http-equiv="X-UA-Compatible" content="ie=edge">
+    <title>同心锁</title>
+    <script src="lib/jquery-3.3.1.min.js"></script>
+    <script src="lib/md5.js"></script>
+    <script src="lib/nebPay.js"></script>
+    <script src="lib/vue.js"></script>
+    <link rel="stylesheet" type="text/css" href="css/lock.css" />
+</head>
+<body>
+    <div id="lock-app">
+        <div class="lock-header">
+            <img src="img/lock-banner.png" />
+        </div>
+        <div class="lock-content" v-cloak >
+            <div class="lock-tabs">
+                <div class="lock-tab" :class="{active : selec_tab === tab}" v-for="(tab,index) in lock_tabs" @click="switchTabFn(index)">{{tab}}</div>
+            </div>
+            <transition name="their">
+                <div class="lock-their" v-if="selec_tab === '他们'">
+                    <div class="their-no-items" v-if="!their_load && !their_items[0]">
+                        (<ゝω·)☆还没有用户添加，快去添加一个吧--><span @click="switchTabFn(2)">打造</span>
+                    </div>
+                    <div class="their-items" v-if="!their_load && their_items[0]">
+                        <div class="their-item" v-for="(lock,index) in their_items">
+                            <div class="item-img-content">
+                                <img :src="'img/lock-info-img-'+(index+1)+'.png'" />
+                                <p>{{lock.speech}}</p>
+                            </div>
+                            <div class="item-auth">
+                                <P>{{lock.lover1}}&{{lock.lover2}}</p>
+                                <p>{{lock.startTime}}</p>
+                            </div>
+                        </div>
+                    </div>
+                    <div class="lock-btn" v-show="!their_load && their_items[0] && size_number > 9">换一批</div>
+                </div>
+            </transition>
+            <div class="their-loading" v-show="their_load && selec_tab === '他们'">
+                <img src="img/lock-item-loader.gif" />
+            </div>
+            <transition name="search">
+                <div class="lock-search" v-if="selec_tab === '寻找'">
+                    <div class="lock-address"><span>钱包地址:</span><input v-model="search_address" class="lock-input" placeholder="请输入你打造同心锁时使用的地址"/></div>
+                    <div class="lock-info" v-if="search_lock && !search_load">
+                        <div class="info-item"><span>恋&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;人</span><span>：{{search_lock.lover1}}&{{search_lock.lover2}}</span></div>
+                        <div class="info-item"><span>打造时间</span><span>：{{search_lock.startTime}}</span></div>
+                        <div class="info-item"><span>告&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;白</span><span>：{{search_lock.speech}}</span></div>
+                    </div>
+                    <div class="lock-info" v-if="search_erro">
+                        <div class="info-item" style="text-align: center;">{{search_erro}}</div>
+                    </div>
+                    <div class="their-loading search-loading" v-if="search_load">
+                        <img src="img/lock-item-loader.gif" />
+                    </div>
+                    <div class="lock-btn" @click="searchLockFn()">查询</div>
+                </div>
+            </transition>
+            <transition name="create">
+                <div class="lock-creat" v-if="selec_tab === '打造' && web_wallet ">
+                    <input class="lock-input" v-model="creat_params.lover1" placeholder="请输入你的昵称" type="text" />
+                    <input class="lock-input" v-model="creat_params.lover2" placeholder="请输入他/她的昵称" type="text" />
+                    <input class="lock-input" v-model="creat_params.lover1_key" placeholder="请输入你的钥匙" type="text" />
+                    <input class="lock-input" v-model="creat_params.lover2_key" placeholder="请输入他/她的钥匙" type="text" />
+                    <input class="lock-input" v-model="creat_params.speech" placeholder="请输入你们的告白" type="text" />
+                    <div class="lock-btn" @click="lockCreateFn()">打   造</div>
+                    <p class="transaction-hash" v-show="transaction_hash">交易hash-><span>{{transaction_hash}}</span></p>
+                    <P class="transaction-tip" v-show="transaction_hash">Tips,交易成功后即成功打造</P>
+                </div>
+            </transition>
+            <transition name="break">
+                <div class="lock-break" v-if="selec_tab === '解开' && web_wallet">
+                    <input class="lock-input" v-model="break_params.lover1_key" placeholder="请输入你的钥匙" type="text" />
+                    <input class="lock-input" v-model="break_params.lover2_key" placeholder="请输入他/她的钥匙" type="text" />
+                    <input class="lock-input" v-model="break_params.speech" placeholder="请输入你们的告白" type="text" />
+                    <div class="lock-btn" @click="breakLockFn()">解   开</div>
+                    <p class="transaction-hash" v-show="transaction_hash">交易hash-><span>{{transaction_hash}}</span></p>
+                    <P class="transaction-tip" v-show="transaction_hash">Tips,交易成功后即成功解锁</P>
+                </div>
+            </transition>
+            <div class="lock-no-web-wallet" v-cloak v-show="!web_wallet && selec_tab !== '他们'">
+                (<ゝω·)☆为了同心服务，请安装星云钱包---><a target="_blank" href="https://github.com/ChengOrangeJu/WebExtensionWallet">星云钱包</a>
+            </div>
+        </div>
+        <div class="lock-footer">
+            <p>您捐助的星云链将用于支持后续的开发和维护网站，感谢您对我们的支持！</p>
+            <p>联系作者：729880623@qq.com</p>
+        </div>
+    </div>
+</body>
+
+<script>
+    var vm = new Vue({
+        el: "#lock-app",
+        data: {
+            lock_tabs: ["他们","寻找","打造","解开"],
+            selec_tab: "他们",
+            page_size: 1,
+            size_number: 0,
+            their_load: 1,
+            search_load: 0,
+            web_wallet: 0,
+            their_items: [],
+            search_lock: "",
+            search_address: "",
+            search_erro: "",
+            creat_params: {
+                lover1: "",
+                lover2: "",
+                lover1_key: "",
+                lover2_key: "",
+                speech: "",
+            },
+            break_params: {
+                lover1_key: "",
+                lover2_key: "",
+                speech: ""
+            },
+            erro_tips: "",
+            transaction_hash: ""
+        },
+        methods: {
+            switchTabFn: function(index){
+                if(this.selec_tab !== this.lock_tabs[index]){
+                    this.selec_tab = this.lock_tabs[index];
+                    this.transaction_hash = "";
+                    this.erro_tips = "";
+                }
+            },
+            lockCreateFn: function() {
+                this.erro_tips = "";
+                for(var param in this.creat_params) {
+                    if(!this.creat_params[param]){
+                        this.erro_tips = "请补全信息";
+                    }
+                }
+                if(this.erro_tips) {
+                    return ;
+                }
+                lockCreate(this.creat_params);
+            },
+            breakLockFn: function() {
+                this.erro_tips = "";
+                for(var param in this.break_params) {
+                    if(!this.break_params[param]){
+                        this.erro_tips = "请补全信息";
+                    }
+                }
+                if(this.erro_tips) {
+                    return ;
+                }
+                lockBreak(this.break_params);
+            },
+            searchLockFn: function() {
+                if(this.search_address) {
+                    this.search_load = 1;
+                    vm.$data.search_erro = "";
+                    searchLock(this.search_address);
+                }
+            },
+            randomLockFn: function() {
+                randomLocks();
+            }
+        }
+    });
+
+
+    var NebPay = require("nebpay"); //https://github.com/nebulasio/nebPay
+    var nebPay = new NebPay();
+    var dappAddress = "n1jLAwFWM137LfvVKbSgRer1tipCniTU18N";
+
+    //检查扩展是否已安装
+    //如果安装了扩展，var“webExtensionWallet”将被注入到web页面中1
+    if(typeof(webExtensionWallet) !== "undefined") {
+        //alert ("扩展钱包未安装，请先安装.")
+        vm.$data.web_wallet = 0;
+    }
+
+    
+
+    function getLocksNumber() {
+        var value = 0;
+        var callArgs = ""
+        nebPay.simulateCall(dappAddress, value, "getSize", callArgs,{
+            listener: cbLocksNumber
+        });
+    }
+
+    function cbLocksNumber(rs) {
+        // if(rs.result != 0){
+            var number = parseInt(rs.result);
+            vm.$data.size_number = number;
+            var first_number = number > 9 ? 9 : number;
+            getLocks(0,number);
+        // }
+    }
+
+    function cbLocks(rs) {
+        vm.$data.their_load = 0;
+        vm.$data.their_items = JSON.parse(rs.result);
+        if(vm.$data.their_items[0] !== null && vm.$data.their_items[0]){
+            vm.$data.their_items = JSON.parse(rs.result).map(function(lock) {
+                var time_str   = [];
+                var start_time = new Date(lock.startTime);
+                time_str.push(start_time.getFullYear());
+                time_str.push(start_time.getMonth()+1);
+                time_str.push(start_time.getDate());
+                lock.startTime = time_str.join("-");
+                return lock;
+            });
+        }
+    }
+
+    function randomLocks() {
+        var random_n = 0;
+        var random_m = vm.$data.size_number - 9;
+        var random_begin = rnd(random_n,random_m);
+        getLocks(random_begin, 9);
+    }
+
+    function getLocks(begin, length) {
+        var value = 0;
+        var callArgs = "["+begin+","+length+"]"
+        nebPay.simulateCall(dappAddress, value, "getLocks", callArgs,{
+            listener: cbLocks
+        });
+    }
+    getLocksNumber();
+    
+
+    
+
+    function lockCreate(creat_params) {
+        var value = 0;
+        var call_args = []; 
+        var call_function = "start";
+        call_args.push("\""+creat_params.lover1+"\"");
+        call_args.push("\""+creat_params.lover2+"\"");
+        call_args.push("\""+hex_md5(creat_params.lover1_key+"loverchain")+"\"");
+        call_args.push("\""+hex_md5(creat_params.lover2_key+"loverchain")+"\"");
+        call_args.push("\""+creat_params.speech+"\"");
+        call_args = "["+call_args.toString()+"]";
+        nebPay.call(dappAddress, value, call_function, call_args, { //使用nebpay的call接口去调用合约,
+            listener: cbSucLock
+        });
+    }
+
+    function lockBreak(break_params) {
+        var value = 0;
+        var call_args = []; 
+        var call_function = "break";
+        call_args.push("\""+break_params.lover1_key+"\"");
+        call_args.push("\""+break_params.lover2_key+"\"");
+        call_args = "["+call_args.toString()+"]";
+        nebPay.call(dappAddress, value, call_function, call_args, { //使用nebpay的call接口去调用合约,
+            listener: cbBreakLock
+        });
+    }
+
+    function searchLock(search_address) {
+        var value = 0;
+        var call_args = []; 
+        var call_function = "get";
+        call_args = "[\""+search_address+"\"]";
+        nebPay.simulateCall(dappAddress, value, call_function, call_args, { //使用nebpay的call接口去调用合约,
+            listener: cbSearchLock
+        });
+    }
+
+    function cbSucLock(resp) {
+        vm.$data.transaction_hash = resp.txhash;
+    }
+
+    function cbBreakLock(resp) {
+        vm.$data.transaction_hash = resp.txhash;
+    }
+
+    function cbSearchLock(resp) {
+        vm.$data.search_load = 0;
+        var result = JSON.parse(resp.result);
+        if(result !== null){
+            vm.$data.search_lock = result;
+            vm.$data.search_lock.startTime = new Date(vm.$data.search_lock.startTime).format("yyyy-MM-dd hh:mm:ss");
+        }else{
+            vm.$data.search_erro = "(<ゝω·)☆未查到对应的同心锁，检查一下地址吧";
+        }
+    }
+
+    function rnd(n, m){
+        var c = m-n+1;  
+        return Math.floor(Math.random() * c + n);
+    }
+
+    Date.prototype.format = function(format) {
+        var date = {
+            "M+": this.getMonth() + 1,
+            "d+": this.getDate(),
+            "h+": this.getHours(),
+            "m+": this.getMinutes(),
+            "s+": this.getSeconds(),
+            "q+": Math.floor((this.getMonth() + 3) / 3),
+            "S+": this.getMilliseconds()
+        };
+        if (/(y+)/i.test(format)) {
+            format = format.replace(RegExp.$1, (this.getFullYear() + '').substr(4 - RegExp.$1.length));
+        }
+        for (var k in date) {
+            if (new RegExp("(" + k + ")").test(format)) {
+                format = format.replace(RegExp.$1, RegExp.$1.length == 1
+                    ? date[k] : ("00" + date[k]).substr(("" + date[k]).length));
+            }
+        }
+        return format;
+    }
+</script>
+</html>
