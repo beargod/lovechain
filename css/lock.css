@@ -1,0 +1,278 @@
+body,div,p{
+    margin: 0;
+    padding: 0;
+}
+[v-cloak] {
+    display: none;
+} 
+.lock-header img{
+    width: 100%;
+}
+.lock-content {
+    width: 62.29%;
+    margin: 28px auto 110px;
+}
+.lock-content .lock-tabs {
+    display: flex;
+    margin: 0 auto;
+    width: 100%;
+    border-bottom: 1px solid #ff6e82;
+    
+}
+.lock-content .lock-tab {
+    width: 12.02%;
+    height: 5vh;
+    line-height: 5vh;
+    color: #ff6e82;
+    font-size: 24px;
+    cursor: pointer;
+    text-align: center;
+    border: 1px solid #ff6e82;
+    border-top-left-radius: 8px;
+    border-top-right-radius: 8px;
+    border-bottom: none;
+}
+.lock-content .lock-tab.active {
+    color: #fff;
+    background-color: #ff6e82;
+}
+.lock-content .lock-their {
+    height: auto;
+    overflow: hidden;
+    padding-top: 28px;
+}
+
+.lock-their .their-item {
+    float: left;
+    width: 32.3333%;
+    margin: 0 1.5% 24px 0;
+}
+.item-img-content img {
+    width: 100%;
+    height: auto;
+}
+.item-img-content p {
+    color: #454545;
+    font-size: 18px;
+    margin-top: 6px;
+    min-height: 100px;
+    max-height: 100px;
+    overflow: hidden;
+    text-overflow: ellipsis;
+    display: -webkit-box;
+    -webkit-line-clamp: 4;
+    -webkit-box-orient: vertical;
+}
+.item-auth p {
+    font-size: 16px;
+    text-align: right;
+    color: #ff6e82;
+}
+.item-auth p:first-child {
+    font-weight: bold;
+}
+.lock-their .their-item:nth-of-type(3n) {
+    margin-right: 0;
+}
+.their-loading {
+    width: 200px;
+    margin: 0 auto;
+    display: block;
+    height: 24vw;
+    display: flex;
+    justify-content: center;
+    align-items: center;
+}
+.their-loading.search-loading{
+    height: 5vw;
+}
+.their-items {
+    height: auto;
+    overflow: hidden;
+}
+.lock-btn {
+    width: 18.31%;
+    margin: 110px auto 0;
+    text-align: center;
+    height: 3.4vw;
+    font-size: 32px;
+    color: #fff;
+    cursor: pointer;
+    border: 1px solid #ff6e82;
+    background-color: #ff6e82;
+    border-radius: 8px;
+    line-height: 3.4vw;
+}
+
+.lock-creat,.lock-break{
+    padding: 4.9% 0;
+    /* opacity: 0;    
+    transition: all .5s;
+    transform: translateY(60px); */
+}
+
+.lock-input-title {
+    font-size: 23px;
+    color: #F37689;
+    font-weight: bold;
+}
+.lock-input {
+    font-size: 20px;
+    color: #ff6e82;
+    width: 46.4%;
+    margin: 0 auto;
+    display: block;
+    height: 41.5px;
+    border-radius: 6px;
+    padding-left: 18px;
+    margin-top: 20px;
+    border: 1px solid #ff6e82;
+}
+.lock-input:focus {
+    outline:none;
+}
+.lock-input:-moz-placeholder { /* Mozilla Firefox 4 to 18 */
+    color: #F37689; opacity:1; 
+}
+
+.lock-input::-moz-placeholder { /* Mozilla Firefox 19+ */
+    color: #F37689;opacity:1;
+}
+
+.lock-input:-ms-input-placeholder{
+    color: #F37689;opacity:1;
+}
+
+.lock-input::-webkit-input-placeholder{
+    color: #F37689;opacity:1;
+}
+.lock-no-web-wallet {
+    height: 24vw;
+    font-size: 25px;
+    text-align: center;
+    line-height: 24vw;
+    color: #ff6e82;
+}
+a {
+    text-decoration: none;
+}
+.their-no-items {
+    height: 24vw;
+    line-height: 24vw;
+    font-size: 24px;
+    color: #ff6e82;
+    text-align: center;
+}
+.their-no-items span {
+    cursor: pointer;
+    color: #ef81e5;
+}
+.transaction-hash {
+    text-align: center;
+    margin-top: 68px;
+    font-size: 18px;
+    color: #ff6e82;
+}
+.transaction-hash span {
+    padding-bottom: 2px;
+    border-bottom: 1px solid;
+}
+.transaction-tip {
+    text-align: center;
+    font-size: 18px;
+    color: #ff6e82;
+    padding-top: 8px;
+}
+.lock-search {
+    min-height: 24vw;
+}
+.lock-address {
+    display: flex;
+    justify-content: center;
+    align-items: center;
+    height: auto;
+    overflow: hidden;
+    margin-top: 80px;
+}
+.lock-address span {
+    font-size: 20px;
+    color: #ff6e82;
+}
+.lock-address input {
+    margin: 0;
+    border: none;
+    border-bottom: 1px solid #ff6e82;
+    border-radius: 0;
+    width: 37%;
+}
+.lock-info .info-item {
+    display: flex;
+    justify-content: flex-start;
+    align-items: center;
+    margin-top: 24px;
+    font-size: 20px;
+    color: #FF6E83;
+    width: 46%;
+    margin: 24px auto 0;
+}
+.info-item span {
+    display: block;
+    min-width: 84px;
+}
+.lock-footer {
+    width: 100%;
+    height: 83px;
+    display: flex;
+    flex-direction: column;
+    justify-content: center;
+    background-color: #0c0517;
+}
+.lock-footer p {
+    color: #fff;
+    font-size: 16px;
+    line-height: 25px;
+    text-align: center;
+}
+
+/* 可以设置不同的进入和离开动画 */
+/* 设置持续时间和动画函数 */
+.create-enter-active  {
+    transition: all .5s;
+}
+.create-leave-active {
+    transition: all 0s;
+}
+.create-enter, .create-leave-to /* .fade-leave-active below version 2.1.8 */ {
+    opacity: 0;
+    transform: translateY(60px);
+}
+.break-enter-active {
+    transition: all .5s;
+}
+.break-leave-active {
+    transition: all 0s;
+}
+.break-enter, .break-leave-to /* .fade-leave-active below version 2.1.8 */ {
+    opacity: 0;
+    transform: translateY(60px);
+}
+.search-enter-active {
+    transition: all .5s;
+}
+.search-leave-active {
+    transition: all 0s;
+}
+.search-enter, .search-leave-to /* .fade-leave-active below version 2.1.8 */ {
+    opacity: 0;
+    transform: translateY(60px);
+}
+.their-enter-active {
+    transition: all .5s;
+}
+.their-leave-active {
+    transition: all 0s;
+}
+.their-enter, .their-leave-to /* .fade-leave-active below version 2.1.8 */ {
+    opacity: 0;
+    transform: translateY(60px);
+}
