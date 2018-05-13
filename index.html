@@ -82,7 +82,7 @@
                     <P class="transaction-tip" v-show="transaction_hash">Tips,交易成功后即成功解锁</P>
                 </div>
             </transition>
-            <div class="lock-no-web-wallet" v-cloak v-show="!web_wallet && selec_tab !== '他们'">
+            <div class="lock-no-web-wallet" v-cloak v-show="!web_wallet && (selec_tab !== '他们' || selec_tab !== '寻找')">
                 (<ゝω·)☆为了同心服务，请安装星云钱包---><a target="_blank" href="https://github.com/ChengOrangeJu/WebExtensionWallet">星云钱包</a>
             </div>
         </div>
@@ -103,7 +103,7 @@
             size_number: 0,
             their_load: 1,
             search_load: 0,
-            web_wallet: 0,
+            web_wallet: 1,
             their_items: [],
             search_lock: "",
             search_address: "",
@@ -171,13 +171,13 @@
 
     var NebPay = require("nebpay"); //https://github.com/nebulasio/nebPay
     var nebPay = new NebPay();
-    var dappAddress = "n1jLAwFWM137LfvVKbSgRer1tipCniTU18N";
+    var dappAddress = "n1nW6j5XZe1P6CgRiE4Qpa6LEZT2Cn4AUc4";
 
     //检查扩展是否已安装
     //如果安装了扩展，var“webExtensionWallet”将被注入到web页面中1
-    if(typeof(webExtensionWallet) !== "undefined") {
+    if(typeof(webExtensionWallet) === "undefined") {
         //alert ("扩展钱包未安装，请先安装.")
-        vm.$data.web_wallet = 1;
+        vm.$data.web_wallet = 0;
     }
 
     
